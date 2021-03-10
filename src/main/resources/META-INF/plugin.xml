@@ -1,19 +1,19 @@
 <idea-plugin>
-    <id>com.github.andruhon.wicketlambdafold2</id>
-    <name>WicketLambdaFold2</name>
-    <vendor>andruhon</vendor>
+    <id>pro.kondratev.wicketlambdafold.wicketlambdafold</id>
+    <name>WicketLambdaFold</name>
+    <vendor email="andrew@kondratev.pro">Andrew Kondratev</vendor>
 
     <!-- Product and plugin compatibility requirements -->
     <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="com.github.andruhon.wicketlambdafold2.services.MyApplicationService"/>
-        <projectService serviceImplementation="com.github.andruhon.wicketlambdafold2.services.MyProjectService"/>
+        <applicationService serviceImplementation="pro.kondratev.wicketlambdafold.services.MyApplicationService"/>
+        <projectService serviceImplementation="pro.kondratev.wicketlambdafold.services.MyProjectService"/>
     </extensions>
 
     <applicationListeners>
-        <listener class="com.github.andruhon.wicketlambdafold2.listeners.MyProjectManagerListener"
+        <listener class="pro.kondratev.wicketlambdafold.listeners.MyProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
     </applicationListeners>
 </idea-plugin>

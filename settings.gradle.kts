@@ -1,1 +1,1 @@
-rootProject.name = "WicketLambdaFold2"
+rootProject.name = "WicketLambdaFold"

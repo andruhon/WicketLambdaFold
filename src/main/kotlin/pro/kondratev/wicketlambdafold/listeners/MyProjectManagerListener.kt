@@ -1,6 +1,6 @@
-package com.github.andruhon.wicketlambdafold2.listeners
+package pro.kondratev.wicketlambdafold.listeners
 
-import com.github.andruhon.wicketlambdafold2.services.MyProjectService
+import pro.kondratev.wicketlambdafold.services.MyProjectService
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManagerListener

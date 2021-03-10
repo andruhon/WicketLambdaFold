@@ -1,4 +1,4 @@
-package com.github.andruhon.wicketlambdafold2
+package pro.kondratev.wicketlambdafold
 
 import com.intellij.AbstractBundle
 import org.jetbrains.annotations.NonNls

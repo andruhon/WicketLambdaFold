@@ -1,4 +1,4 @@
-# WicketLambdaFold2
+# WicketLambdaFold
 
 ![Build](https://github.com/andruhon/WicketLambdaFold2/workflows/Build/badge.svg)
 [![Version](https://img.shields.io/jetbrains/plugin/v/PLUGIN_ID.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
