@@ -1,7 +1,7 @@
 package pro.kondratev.wicketlambdafold.services
 
-import pro.kondratev.wicketlambdafold.MyBundle
 import com.intellij.openapi.project.Project
+import pro.kondratev.wicketlambdafold.MyBundle
 
 class MyProjectService(project: Project) {
 
