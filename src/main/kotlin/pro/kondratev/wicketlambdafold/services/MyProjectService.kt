@@ -1,11 +1,11 @@
 package pro.kondratev.wicketlambdafold.services
 
 import com.intellij.openapi.project.Project
-import pro.kondratev.wicketlambdafold.MyBundle
+import pro.kondratev.wicketlambdafold.WicketLambdaFoldBundle
 
 class MyProjectService(project: Project) {
 
     init {
-        println(MyBundle.message("projectService", project.name))
+        println(WicketLambdaFoldBundle.message("projectService", project.name))
     }
 }

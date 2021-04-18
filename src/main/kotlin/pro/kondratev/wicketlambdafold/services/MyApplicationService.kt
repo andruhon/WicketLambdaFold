@@ -1,10 +1,10 @@
 package pro.kondratev.wicketlambdafold.services
 
-import pro.kondratev.wicketlambdafold.MyBundle
+import pro.kondratev.wicketlambdafold.WicketLambdaFoldBundle
 
 class MyApplicationService {
 
     init {
-        println(MyBundle.message("applicationService"))
+        println(WicketLambdaFoldBundle.message("applicationService"))
     }
 }
