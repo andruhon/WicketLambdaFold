@@ -7,6 +7,10 @@ import org.jetbrains.annotations.PropertyKey
 @NonNls
 public const val BUNDLE = "messages.WicketLambdaFoldBundle"
 
+public const val LAMBDA_MODEL_FQN = "org.apache.wicket.model.LambdaModel"
+
+public const val LAMBDA_MODEL_NAME = "LambdaModel"
+
 object WicketLambdaFoldBundle : AbstractBundle(BUNDLE) {
 
     @Suppress("SpreadOperator")

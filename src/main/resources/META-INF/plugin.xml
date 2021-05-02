@@ -6,8 +6,10 @@
     <!-- Product and plugin compatibility requirements -->
     <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <lang.foldingBuilder language="JAVA" implementationClass="pro.kondratev.wicketlambdafold.language.LambdaModelFoldingBuilder"/>
         <applicationService serviceImplementation="pro.kondratev.wicketlambdafold.services.MyApplicationService"/>
         <projectService serviceImplementation="pro.kondratev.wicketlambdafold.services.MyProjectService"/>
         <projectConfigurable parentId="language" displayName="Apache Wicket"

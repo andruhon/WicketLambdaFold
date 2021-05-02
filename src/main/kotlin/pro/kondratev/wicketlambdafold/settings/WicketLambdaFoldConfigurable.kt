@@ -28,5 +28,4 @@ class WicketLambdaFoldConfigurable : com.intellij.openapi.options.Configurable {
     override fun getDisplayName(): String {
         return WicketLambdaFoldBundle.message("name")
     }
-
 }

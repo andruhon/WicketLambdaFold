@@ -11,5 +11,4 @@ enum class SupportedWicketVersions(@PropertyKey(resourceBundle = BUNDLE) private
     WICKET_9("wicket.version.9");
 
     override fun toString(): String = WicketLambdaFoldBundle.message(key)
-
 }
