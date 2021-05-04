@@ -11,6 +11,10 @@ public const val LAMBDA_MODEL_FQN = "org.apache.wicket.model.LambdaModel"
 
 public const val LAMBDA_MODEL_NAME = "LambdaModel"
 
+public const val PROPERTY_MODEL_FQN = "org.apache.wicket.model.PropertyModel";
+
+public const val PROPERTY_MODEL_NAME = "org.apache.wicket.model.PropertyModel";
+
 object WicketLambdaFoldBundle : AbstractBundle(BUNDLE) {
 
     @Suppress("SpreadOperator")

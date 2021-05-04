@@ -15,6 +15,12 @@
         <projectConfigurable parentId="language" displayName="Apache Wicket"
                              instance="pro.kondratev.wicketlambdafold.settings.WicketLambdaFoldConfigurable"
                              id="pro.kondratev.wicketlambdafold.settings.WicketLambdaFoldConfigurable"/>
+
+        <localInspection language="JAVA" groupPath="Java"
+                         bundle="messages.WicketLambdaFoldBundle" key="PropertyModelInspection"
+                         groupBundle="messages.InspectionsBundle" groupKey="group.names.naming.conventions"
+                         enabledByDefault="true" level="WARNING"
+                         implementationClass="pro.kondratev.wicketlambdafold.inspections.PropertyModelInspection" />
     </extensions>
 
     <applicationListeners>
