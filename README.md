@@ -1,8 +1,8 @@
 # WicketLambdaFold
 
 ![Build](https://github.com/andruhon/WicketLambdaFold2/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/9444.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/9444.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
+[![Version](https://img.shields.io/jetbrains/plugin/v/9444.svg)](https://plugins.jetbrains.com/plugin/9444)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/9444.svg)](https://plugins.jetbrains.com/plugin/9444)
 
 ## Template ToDo list
 - [x] Create a new [IntelliJ Platform Plugin Template][template] project.
