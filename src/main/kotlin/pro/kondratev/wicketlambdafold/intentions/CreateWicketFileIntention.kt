@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiElement
 import com.intellij.psi.XmlElementFactory
+import java.util.*
 
 /**
  * Create a resource file for Wicket Panel or Page
@@ -51,6 +52,7 @@ abstract class CreateWicketFileIntention : BaseElementAtCaretIntentionAction() {
         if (fuse <= 0) {
             logger.error(
                 String.format(
+                    Locale.getDefault(),
                     "isSubclassOfApplicableClasses exceeds the MAX_SUPERCLASS_SCAN_DEPTH of %d",
                     MAX_SUPERCLASS_SCAN_DEPTH
                 )
