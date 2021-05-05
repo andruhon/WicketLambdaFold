@@ -21,6 +21,20 @@
                          groupBundle="messages.InspectionsBundle" groupKey="group.names.naming.conventions"
                          enabledByDefault="true" level="WARNING"
                          implementationClass="pro.kondratev.wicketlambdafold.inspections.PropertyModelInspection" />
+
+        <intentionAction>
+            <className>pro.kondratev.wicketlambdafold.intentions.CreateWicketHtmlIntention</className>
+            <descriptionDirectoryName>CreateWicketHtmlIntention</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction>
+            <className>pro.kondratev.wicketlambdafold.intentions.CreateWicketPropertiesIntention</className>
+            <descriptionDirectoryName>CreateWicketPropertiesIntention</descriptionDirectoryName>
+        </intentionAction>
+        <intentionAction>
+            <className>pro.kondratev.wicketlambdafold.intentions.CreateWicketHtmlAndPropertiesIntention</className>
+            <descriptionDirectoryName>CreateWicketHtmlAndPropertiesIntention</descriptionDirectoryName>
+        </intentionAction>
+
     </extensions>
 
     <applicationListeners>

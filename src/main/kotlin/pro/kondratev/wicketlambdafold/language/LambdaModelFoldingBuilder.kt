@@ -5,10 +5,21 @@ import com.intellij.lang.folding.FoldingBuilderEx
 import com.intellij.lang.folding.FoldingDescriptor
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.*
+import com.intellij.psi.JavaRecursiveElementWalkingVisitor
+import com.intellij.psi.PsiElement
+import com.intellij.psi.PsiImportStatement
+import com.intellij.psi.PsiJavaFile
+import com.intellij.psi.PsiMethodCallExpression
+import com.intellij.psi.PsiType
 import com.intellij.psi.util.PsiTreeUtil
 import pro.kondratev.wicketlambdafold.LAMBDA_MODEL_FQN
 import pro.kondratev.wicketlambdafold.LAMBDA_MODEL_NAME
+
+/**
+ * LambdaModel.of with model getter and setter should have exactly 3 params.
+ * 2 params is read only and is already short enough.
+ */
+const val FOLDING_PARAMS_COUNT = 3
 
 class LambdaModelFoldingBuilder : FoldingBuilderEx() {
 
@@ -17,7 +28,7 @@ class LambdaModelFoldingBuilder : FoldingBuilderEx() {
 
         if (root !is PsiJavaFile) {
             // Plugin only supports java currently
-            return descriptors.toTypedArray();
+            return descriptors.toTypedArray()
         }
 
         if (PsiTreeUtil.findChildrenOfType(root, PsiImportStatement::class.java).any
@@ -36,9 +47,7 @@ class LambdaModelFoldingBuilder : FoldingBuilderEx() {
 
                 private fun addLambdaModelFoldDescriptor(expression: PsiMethodCallExpression) {
                     val args = expression.argumentList.expressions
-                    // LambdaModel.of with model getter and setter should have exactly 3 params
-                    // 2 params is read only and is already short enough
-                    if (args.size != 3) {
+                    if (args.size != FOLDING_PARAMS_COUNT) {
                         return
                     }
                     val modelDef = args[0]
@@ -48,18 +57,17 @@ class LambdaModelFoldingBuilder : FoldingBuilderEx() {
                     val setterStr = setterDef.text
                     val modelDefType = modelDef.type
                     val hasGetterAndSetter = getterStr.contains(GET_PREFIX) &&
-                            getterStr.replace(GET_PREFIX, "/") == setterStr.replace(SET_PREFIX, "/")
-                            || getterStr.contains(IS_PREFIX)
-                            && getterStr.replace(IS_PREFIX, "/") == setterStr.replace(SET_PREFIX, "/")
+                        getterStr.replace(GET_PREFIX, "/") == setterStr.replace(SET_PREFIX, "/") ||
+                        getterStr.contains(IS_PREFIX) &&
+                        getterStr.replace(IS_PREFIX, "/") == setterStr.replace(SET_PREFIX, "/")
 
                     // First param is assignable to IModel and following two looks like getter and setter
                     if (modelDefType == null ||
                         !PsiType.getTypeByName(
-                            "org.apache.wicket.model.IModel",
-                            root.project,
-                            root.resolveScope
-                        ).isAssignableFrom(modelDefType)
-                        || !hasGetterAndSetter
+                                "org.apache.wicket.model.IModel",
+                                root.project,
+                                root.resolveScope
+                            ).isAssignableFrom(modelDefType) || !hasGetterAndSetter
                     ) {
                         return
                     }
@@ -72,7 +80,6 @@ class LambdaModelFoldingBuilder : FoldingBuilderEx() {
                         )
                     )
                 }
-
             })
         }
 
@@ -88,7 +95,9 @@ class LambdaModelFoldingBuilder : FoldingBuilderEx() {
     }
 
     internal class FoldGetSetDescriptor(
-        expression: PsiMethodCallExpression, range: TextRange, private val getterStr: String
+        expression: PsiMethodCallExpression,
+        range: TextRange,
+        private val getterStr: String
     ) : FoldingDescriptor(expression.node, range) {
         val prefix: String = if (getterStr.contains(IS_PREFIX)) IS_PREFIX else GET_PREFIX
 
@@ -99,9 +108,9 @@ class LambdaModelFoldingBuilder : FoldingBuilderEx() {
     }
 
     companion object {
-        private val GET_PREFIX = "::get"
-        private val IS_PREFIX = "::is"
-        private val SET_PREFIX = "::set"
-        private val SET_SUFFIX = "/set"
+        private const val GET_PREFIX = "::get"
+        private const val IS_PREFIX = "::is"
+        private const val SET_PREFIX = "::set"
+        private const val SET_SUFFIX = "/set"
     }
 }
