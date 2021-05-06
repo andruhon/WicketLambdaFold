@@ -9,6 +9,8 @@ const val BUNDLE = "messages.WicketLambdaFoldBundle"
 
 const val LAMBDA_MODEL_FQN = "org.apache.wicket.model.LambdaModel"
 
+const val IMODEL_INTERFACE_FQN = "org.apache.wicket.model.IModel"
+
 const val LAMBDA_MODEL_NAME = "LambdaModel"
 
 const val PROPERTY_MODEL_FQN = "org.apache.wicket.model.PropertyModel"

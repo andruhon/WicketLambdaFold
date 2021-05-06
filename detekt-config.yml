@@ -12,3 +12,5 @@ formatting:
 style:
   ReturnCount:
     active: false
+  WildcardImport:
+    active: false

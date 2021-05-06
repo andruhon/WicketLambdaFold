@@ -10,18 +10,7 @@ import com.intellij.openapi.ui.MessageType
 import com.intellij.openapi.ui.popup.Balloon
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.wm.WindowManager
-import com.intellij.psi.JavaElementVisitor
-import com.intellij.psi.PsiElementVisitor
-import com.intellij.psi.PsiExpression
-import com.intellij.psi.PsiNewExpression
-import com.intellij.psi.PsiMethodCallExpression
-import com.intellij.psi.PsiReferenceExpression
-import com.intellij.psi.JavaPsiFacade
-import com.intellij.psi.PsiExpressionList
-import com.intellij.psi.PsiMethod
-import com.intellij.psi.PsiWildcardType
-import com.intellij.psi.GenericsUtil
-import com.intellij.psi.PsiElement
+import com.intellij.psi.*
 import com.intellij.psi.impl.source.PsiImmediateClassType
 import com.intellij.psi.impl.source.tree.java.PsiLiteralExpressionImpl
 import com.intellij.psi.impl.source.tree.java.PsiReferenceExpressionImpl
@@ -31,10 +20,9 @@ import com.intellij.psi.util.PsiTypesUtil
 import com.intellij.psi.util.PsiUtil
 import com.intellij.ui.awt.RelativePoint
 import com.siyeh.ig.psiutils.ImportUtils
-import pro.kondratev.wicketlambdafold.LAMBDA_MODEL_FQN
-import pro.kondratev.wicketlambdafold.LAMBDA_MODEL_NAME
-import pro.kondratev.wicketlambdafold.PROPERTY_MODEL_FQN
-import pro.kondratev.wicketlambdafold.WicketLambdaFoldBundle
+import org.jetbrains.annotations.NotNull
+import org.jetbrains.annotations.Nullable
+import pro.kondratev.wicketlambdafold.*
 
 const val FADEOUT_TIME = 7500L
 
@@ -87,13 +75,19 @@ class PropertyModelInspection : AbstractBaseJavaLocalInspectionTool() {
 
         private fun fixPropertyModel(project: Project, element: PsiExpression) {
             val factory = JavaPsiFacade.getElementFactory(project)
-            importLambdaIfNeeded(project, element)
+            val lambdaModelClass = importLambdaIfNeeded(project, element)
+            val iModelClass = resolveClass(IMODEL_INTERFACE_FQN, project, element)
             val args = element.children.find { it is PsiExpressionList } as PsiExpressionList
             val (modelArg, propNameArg) = args.expressions
             assert(propNameArg is PsiLiteralExpressionImpl)
-            // TODO add some check to display nicer message instead of index out of bound
-            val genericParam = (GenericsUtil.getVariableTypeByExpressionType(modelArg.type) as PsiImmediateClassType)
-                .parameters[0]
+            val modelArgType = GenericsUtil.getVariableTypeByExpressionType(modelArg.type) as PsiImmediateClassType
+            if (
+                modelArgType.resolve()?.equals(iModelClass) != true &&
+                modelArgType.resolve()?.isInheritor(iModelClass, true) != true
+            ) {
+                throw IllegalStateException("LambdaModel only supports IModel implementors as model parameter")
+            }
+            val genericParam = modelArgType.parameters[0]
             val modelObjectClass = PsiTypesUtil.getPsiClass(
                 if (genericParam is PsiWildcardType) genericParam.bound else genericParam
             )!!
@@ -106,24 +100,43 @@ class PropertyModelInspection : AbstractBaseJavaLocalInspectionTool() {
             )
             if (getter != null) {
                 val methodQualifierPrefix = modelObjectClass.qualifiedName + "::"
-                val newArgs = mutableListOf(
-                    (modelArg as PsiReferenceExpressionImpl).qualifiedName, methodQualifierPrefix + getter.name
-                )
-                if (setter != null) {
-                    newArgs.add(methodQualifierPrefix + setter.name)
+
+                val newArgs = when (modelArg) {
+                    is PsiReferenceExpressionImpl -> {
+                        mutableListOf(modelArg.qualifiedName, methodQualifierPrefix + getter.name)
+                    }
+                    is PsiMethodCallExpression -> {
+                        mutableListOf(modelArg.text, methodQualifierPrefix + getter.name)
+                    }
+                    else -> {
+                        throw IllegalStateException("Unsupported model argument type")
+                    }
                 }
-                val lambdaModelExpression = factory.createExpressionFromText(
-                    LAMBDA_MODEL_NAME + ".of(" + newArgs.joinToString(", ") + ")", element
-                )
+
+                val isMap = if (setter != null) {
+                    newArgs.add(methodQualifierPrefix + setter.name)
+                    false
+                } else lambdaModelClass.allMethods.any() { psiMethod -> psiMethod.name == "map" }
+                val lambdaModelExpression = if (isMap) {
+                    factory.createExpressionFromText(
+                        newArgs[0] + ".map(" + newArgs[1] + ")", element
+                    )
+                } else {
+                    factory.createExpressionFromText(
+                        LAMBDA_MODEL_NAME + ".of(" + newArgs.joinToString(", ") + ")", element
+                    )
+                }
+
                 element.replace(lambdaModelExpression)
             } else {
                 warning(project, "Can't find getter for property " + propName)
             }
         }
 
-        private fun importLambdaIfNeeded(project: Project, element: PsiElement) {
-            val resolveHelper = JavaPsiFacade.getInstance(project).resolveHelper
-            ImportUtils.addImportIfNeeded(resolveHelper.resolveReferencedClass(LAMBDA_MODEL_FQN, element)!!, element)
+        private fun importLambdaIfNeeded(project: Project, element: PsiElement): @NotNull PsiClass {
+            val lambdaModelClass = resolveClass(LAMBDA_MODEL_FQN, project, element)
+            ImportUtils.addImportIfNeeded(lambdaModelClass, element)
+            return lambdaModelClass
         }
 
         private fun warning(project: Project, message: String) {
@@ -139,5 +152,14 @@ class PropertyModelInspection : AbstractBaseJavaLocalInspectionTool() {
                     RelativePoint.getCenterOf(statusBar.component),
                     Balloon.Position.atRight)
         }
+    }
+
+    private fun resolveClass(
+        fqn: String,
+        project: Project,
+        element: PsiElement
+    ): @Nullable PsiClass {
+        val resolveHelper = JavaPsiFacade.getInstance(project).resolveHelper
+        return resolveHelper.resolveReferencedClass(fqn, element)!!
     }
 }
