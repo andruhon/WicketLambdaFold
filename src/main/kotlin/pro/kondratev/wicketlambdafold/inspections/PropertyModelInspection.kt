@@ -11,6 +11,7 @@ import com.intellij.openapi.ui.popup.Balloon
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.wm.WindowManager
 import com.intellij.psi.*
+import com.intellij.psi.impl.source.PsiClassReferenceType
 import com.intellij.psi.impl.source.PsiImmediateClassType
 import com.intellij.psi.impl.source.tree.java.PsiLiteralExpressionImpl
 import com.intellij.psi.impl.source.tree.java.PsiReferenceExpressionImpl
@@ -67,16 +68,14 @@ class PropertyModelInspection : AbstractBaseJavaLocalInspectionTool() {
                 is PsiNewExpression -> fixPropertyModel(project, element)
                 is PsiMethodCallExpression -> fixPropertyModel(project, element)
                 else -> {
-                    warning(project, "Unexpected element type")
-                    return
+                    throw showErrorAndThrow(project, "Unexpected element type")
                 }
             }
         }
 
         private fun fixPropertyModel(project: Project, element: PsiExpression) {
-            val factory = JavaPsiFacade.getElementFactory(project)
-            val lambdaModelClass = importLambdaIfNeeded(project, element)
             val iModelClass = resolveClass(IMODEL_INTERFACE_FQN, project, element)
+                ?: throw showErrorAndThrow(project, "Can't resolve IModel interface")
             val args = element.children.find { it is PsiExpressionList } as PsiExpressionList
             val (modelArg, propNameArg) = args.expressions
             assert(propNameArg is PsiLiteralExpressionImpl)
@@ -85,20 +84,53 @@ class PropertyModelInspection : AbstractBaseJavaLocalInspectionTool() {
                 modelArgType.resolve()?.equals(iModelClass) != true &&
                 modelArgType.resolve()?.isInheritor(iModelClass, true) != true
             ) {
-                throw IllegalStateException("LambdaModel only supports IModel implementors as model parameter")
+                throw showErrorAndThrow(project, "LambdaModel only supports IModel implementors as model parameter")
             }
             val genericParam = modelArgType.parameters[0]
-            val modelObjectClass = PsiTypesUtil.getPsiClass(
+            var modelObjectClass = PsiTypesUtil.getPsiClass(
                 if (genericParam is PsiWildcardType) genericParam.bound else genericParam
             )!!
-            val propName = PsiLiteralUtil.getStringLiteralContent(propNameArg as PsiLiteralExpressionImpl)!!
+            var propName = PsiLiteralUtil.getStringLiteralContent(propNameArg as PsiLiteralExpressionImpl)!!
+            var modelExpression = modelArg
+            if (propName.contains(".")) {
+                val propertiesChain = propName.split(".").toMutableList()
+                propName = propertiesChain.last()
+                for (prop in propertiesChain.dropLast(1)) {
+                    val (returnClass, expression) = buildExpression(
+                        modelObjectClass,
+                        modelExpression,
+                        prop,
+                        true,
+                        project,
+                        element
+                    )
+                    modelExpression = expression
+                    modelObjectClass = returnClass
+                }
+            }
+            modelExpression =
+                buildExpression(modelObjectClass, modelExpression, propName, false, project, element).second
+
+            element.replace(modelExpression)
+        }
+
+        private fun buildExpression(
+            modelObjectClass: PsiClass,
+            modelArg: PsiExpression,
+            propName: String,
+            readOnly: Boolean,
+            project: Project,
+            element: PsiElement
+        ): Pair<@Nullable PsiClass, @NotNull PsiExpression> {
             val getter: PsiMethod? = PropertyUtilBase.findPropertyGetter(
                 modelObjectClass, propName, false, true
             )
-            val setter: PsiMethod? = PropertyUtilBase.findPropertySetter(
+            val setter: PsiMethod? = if (readOnly) null else PropertyUtilBase.findPropertySetter(
                 modelObjectClass, propName, false, true
             )
             if (getter != null) {
+                val factory = JavaPsiFacade.getElementFactory(project)
+                val lambdaModelClass = importLambdaIfNeeded(project, element)
                 val methodQualifierPrefix = modelObjectClass.qualifiedName + "::"
 
                 val newArgs = when (modelArg) {
@@ -109,7 +141,7 @@ class PropertyModelInspection : AbstractBaseJavaLocalInspectionTool() {
                         mutableListOf(modelArg.text, methodQualifierPrefix + getter.name)
                     }
                     else -> {
-                        throw IllegalStateException("Unsupported model argument type")
+                        throw showErrorAndThrow(project, "Unsupported model argument type")
                     }
                 }
 
@@ -117,29 +149,40 @@ class PropertyModelInspection : AbstractBaseJavaLocalInspectionTool() {
                     newArgs.add(methodQualifierPrefix + setter.name)
                     false
                 } else lambdaModelClass.allMethods.any() { psiMethod -> psiMethod.name == "map" }
-                val lambdaModelExpression = if (isMap) {
-                    factory.createExpressionFromText(
-                        newArgs[0] + ".map(" + newArgs[1] + ")", element
+
+                var returnModelClass = resolveClass(getter.returnType!!.canonicalText, project, element)
+                if (returnModelClass == null) {
+                    // The return type can't be resolved by FQN, this is probably some kind of generic
+                    returnModelClass = (getter.returnType as PsiClassReferenceType).resolve()?.superClass
+                }
+                if (returnModelClass == null) {
+                    throw showErrorAndThrow(project, "Can't resolve return class for getter " + getter.name)
+                }
+                return if (isMap) {
+                    Pair(
+                        returnModelClass, factory.createExpressionFromText(
+                            newArgs[0] + ".map(" + newArgs[1] + ")", element
+                        )
                     )
                 } else {
-                    factory.createExpressionFromText(
-                        LAMBDA_MODEL_NAME + ".of(" + newArgs.joinToString(", ") + ")", element
+                    Pair(
+                        returnModelClass, factory.createExpressionFromText(
+                            LAMBDA_MODEL_NAME + ".of(" + newArgs.joinToString<@NotNull String>(", ") + ")", element
+                        )
                     )
                 }
-
-                element.replace(lambdaModelExpression)
             } else {
-                warning(project, "Can't find getter for property " + propName)
+                throw showErrorAndThrow(project, "Can't find getter for property " + propName)
             }
         }
 
         private fun importLambdaIfNeeded(project: Project, element: PsiElement): @NotNull PsiClass {
-            val lambdaModelClass = resolveClass(LAMBDA_MODEL_FQN, project, element)
+            val lambdaModelClass = resolveClass(LAMBDA_MODEL_FQN, project, element)!!
             ImportUtils.addImportIfNeeded(lambdaModelClass, element)
             return lambdaModelClass
         }
 
-        private fun warning(project: Project, message: String) {
+        private fun showErrorAndThrow(project: Project, message: String): IllegalStateException {
             val logger = Logger.getInstance(this.javaClass.simpleName)
             logger.warn(message)
             val statusBar = WindowManager.getInstance().getStatusBar(project)
@@ -150,7 +193,9 @@ class PropertyModelInspection : AbstractBaseJavaLocalInspectionTool() {
                 .createBalloon()
                 .show(
                     RelativePoint.getCenterOf(statusBar.component),
-                    Balloon.Position.atRight)
+                    Balloon.Position.atRight
+                )
+            return IllegalStateException(message)
         }
     }
 
@@ -158,8 +203,8 @@ class PropertyModelInspection : AbstractBaseJavaLocalInspectionTool() {
         fqn: String,
         project: Project,
         element: PsiElement
-    ): @Nullable PsiClass {
+    ): PsiClass? {
         val resolveHelper = JavaPsiFacade.getInstance(project).resolveHelper
-        return resolveHelper.resolveReferencedClass(fqn, element)!!
+        return resolveHelper.resolveReferencedClass(fqn, element)
     }
 }
