@@ -6,6 +6,10 @@ import com.intellij.util.ui.UI.PanelFactory.panel
 import pro.kondratev.wicketlambdafold.WicketLambdaFoldBundle
 import javax.swing.JComponent
 
+/**
+ * TODO add configuration if necessary
+ * Can be enabled in plugin.xml
+ */
 class WicketLambdaFoldConfigurable : com.intellij.openapi.options.Configurable {
 
     override fun createComponent(): JComponent {

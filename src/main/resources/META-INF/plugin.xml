@@ -10,11 +10,9 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <lang.foldingBuilder language="JAVA" implementationClass="pro.kondratev.wicketlambdafold.language.LambdaModelFoldingBuilder"/>
-        <applicationService serviceImplementation="pro.kondratev.wicketlambdafold.services.MyApplicationService"/>
-        <projectService serviceImplementation="pro.kondratev.wicketlambdafold.services.MyProjectService"/>
-        <projectConfigurable parentId="language" displayName="Apache Wicket"
+        <!--projectConfigurable parentId="language" displayName="Apache Wicket"
                              instance="pro.kondratev.wicketlambdafold.settings.WicketLambdaFoldConfigurable"
-                             id="pro.kondratev.wicketlambdafold.settings.WicketLambdaFoldConfigurable"/>
+                             id="pro.kondratev.wicketlambdafold.settings.WicketLambdaFoldConfigurable"/-->
 
         <localInspection language="JAVA" groupPath="Java"
                          bundle="messages.WicketLambdaFoldBundle" key="PropertyModelInspection"
@@ -37,8 +35,8 @@
 
     </extensions>
 
-    <applicationListeners>
+    <!--applicationListeners>
         <listener class="pro.kondratev.wicketlambdafold.listeners.MyProjectManagerListener"
                   topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </applicationListeners>
+    </applicationListeners-->
 </idea-plugin>

@@ -1,6 +1,6 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
-# WicketLambdaFold2 Changelog
+# WicketLambdaFold Changelog
 
 ## 0.5.0
 ### Added
