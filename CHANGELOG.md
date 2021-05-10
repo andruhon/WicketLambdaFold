@@ -2,7 +2,7 @@
 
 # WicketLambdaFold Changelog
 
-## 0.5.0
+## [Unreleased]
 ### Added
 - Rebuilt plugin using [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
 - Replaced deprecated API uses
