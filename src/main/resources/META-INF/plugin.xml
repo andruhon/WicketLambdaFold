@@ -2,6 +2,7 @@
     <id>pro.kondratev.wicketlambdafold</id>
     <name>WicketLambdaFold</name>
     <vendor email="andrew@kondratev.pro">Andrew Kondratev</vendor>
+    <idea-version since-build="202"/>
 
     <!-- Product and plugin compatibility requirements -->
     <!-- https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
