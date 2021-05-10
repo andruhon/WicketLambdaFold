@@ -1,5 +1,5 @@
 <idea-plugin>
-    <id>pro.kondratev.wicketlambdafold.wicketlambdafold</id>
+    <id>pro.kondratev.wicketlambdafold</id>
     <name>WicketLambdaFold</name>
     <vendor email="andrew@kondratev.pro">Andrew Kondratev</vendor>
 
@@ -34,9 +34,4 @@
         </intentionAction>
 
     </extensions>
-
-    <!--applicationListeners>
-        <listener class="pro.kondratev.wicketlambdafold.listeners.MyProjectManagerListener"
-                  topic="com.intellij.openapi.project.ProjectManagerListener"/>
-    </applicationListeners-->
 </idea-plugin>

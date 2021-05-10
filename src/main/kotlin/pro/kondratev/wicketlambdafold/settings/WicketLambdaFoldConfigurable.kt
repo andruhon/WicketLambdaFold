@@ -1,8 +1,6 @@
 package pro.kondratev.wicketlambdafold.settings
 
-import com.intellij.openapi.ui.ComboBox
 import com.intellij.util.ui.UI
-import com.intellij.util.ui.UI.PanelFactory.panel
 import pro.kondratev.wicketlambdafold.WicketLambdaFoldBundle
 import javax.swing.JComponent
 
@@ -14,10 +12,10 @@ class WicketLambdaFoldConfigurable : com.intellij.openapi.options.Configurable {
 
     override fun createComponent(): JComponent {
         return UI.PanelFactory.grid()
-            .add(
-                panel(ComboBox(SupportedWicketVersions.values()))
-                    .withLabel(WicketLambdaFoldBundle.message("wicket.supported.version"))
-            )
+//            .add(
+//                panel(ComboBox(SupportedWicketVersions.values()))
+//                    .withLabel(WicketLambdaFoldBundle.message("wicket.supported.version"))
+//            )
             .createPanel()
     }
 
