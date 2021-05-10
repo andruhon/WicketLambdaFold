@@ -8,6 +8,8 @@ formatting:
     active: false
   NoWildcardImports:
     active: false
+  MaximumLineLength:
+    maxLineLength: 150
 
 style:
   ReturnCount:
